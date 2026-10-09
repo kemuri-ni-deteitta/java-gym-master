@@ -6,6 +6,13 @@ public class Timetable {
 
     private HashMap<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable;
 
+    // Инициализируем HashMap, в котором будет храниться расписание по дням недели
+    public Timetable() {
+
+        timetable = new HashMap<>();
+
+    }
+
     public void addNewTrainingSession(TrainingSession trainingSession) {
 
         DayOfWeek day = trainingSession.getDayOfWeek();
@@ -96,5 +103,48 @@ public class Timetable {
 
         return sessionsAtTime;
     }
+
+    public List<CounterOfTrainings> getCountByCoaches() {
+
+        // Храним количество тренировок для каждого тренера
+        HashMap<Coach, Integer> countByCoaches = new HashMap<>();
+
+        // Проходим по расписанию каждого дня
+        for (TreeMap<TimeOfDay, List<TrainingSession>> daySchedule : timetable.values()) {
+
+            // Проходим по спискам тренировок для каждого времени
+            for (List<TrainingSession> sessionsAtTime : daySchedule.values()) {
+
+                // Проходим по каждой тренировке
+                for (TrainingSession trainingSession : sessionsAtTime) {
+
+                    Coach coach = trainingSession.getCoach();
+
+                    // Получаем текущее количество тренировок тренера
+                    int currentCount = countByCoaches.getOrDefault(coach, 0);
+
+                    // Увеличиваем количество тренировок на одну
+                    countByCoaches.put(coach, currentCount + 1);
+                }
+            }
+        }
+
+        // Создаем итоговый список
+        List<CounterOfTrainings> result = new ArrayList<>();
+
+        // Преобразуем пары Coach -> количество в CounterOfTrainings
+        for (Map.Entry<Coach, Integer> entry : countByCoaches.entrySet()) {
+
+            CounterOfTrainings counter = new CounterOfTrainings(entry.getKey(), entry.getValue());
+
+            result.add(counter);
+        }
+
+        // Сортируем по количеству тренировок по убыванию
+        result.sort((first, second) -> Integer.compare(second.getCount(), first.getCount()));
+
+        return result;
+    }
+
 
 }
